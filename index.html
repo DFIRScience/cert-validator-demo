@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Certificate validator — DEMO</title>
+<style>
+  :root { --blue:#009edb; --ink:#1a1d29; --muted:#5f6472; --ok:#1e8e3e; --bad:#c5221f; --warn:#b26a00; --bg:#f5f6f8; --card:#fff; --line:#dfe2e8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  .demo { background:#fff3cd; color:#5c4400; border-bottom:2px solid #f0c36d; padding:10px 16px; font-weight:600; text-align:center; }
+  header { background:var(--blue); color:#fff; padding:18px 16px; }
+  header .wrap { max-width:760px; margin:0 auto; display:flex; align-items:center; gap:14px; }
+  header .mark { width:44px; height:44px; border-radius:50%; background:#fff; color:var(--blue); display:grid; place-items:center; font-weight:800; font-size:13px; flex:none; }
+  header h1 { margin:0; font-size:20px; font-weight:600; }
+  header p { margin:2px 0 0; font-size:13px; opacity:.9; }
+  main { max-width:760px; margin:24px auto; padding:0 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:16px; }
+  label { display:block; font-weight:600; margin-bottom:6px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  input[type=text] { flex:1 1 260px; font:inherit; font-family:ui-monospace, Consolas, monospace; letter-spacing:.5px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; text-transform:uppercase; }
+  button { font:inherit; padding:10px 16px; border-radius:8px; border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
+  button.secondary { background:#fff; color:var(--blue); }
+  .hint { color:var(--muted); font-size:13px; margin-top:8px; }
+  .status { display:flex; align-items:center; gap:12px; font-size:18px; font-weight:700; margin-bottom:12px; }
+  .status .dot { width:14px; height:14px; border-radius:50%; flex:none; }
+  .valid .dot { background:var(--ok); } .valid { color:var(--ok); }
+  .revoked .dot { background:var(--bad); } .revoked { color:var(--bad); }
+  .unknown .dot { background:var(--warn); } .unknown { color:var(--warn); }
+  dl { display:grid; grid-template-columns: 160px 1fr; gap:6px 14px; margin:0; }
+  dt { color:var(--muted); } dd { margin:0; }
+  code { font-family:ui-monospace, Consolas, monospace; }
+  .small { font-size:13px; color:var(--muted); }
+  .ok { color:var(--ok); font-weight:600; } .bad { color:var(--bad); font-weight:600; }
+  #qr { margin-top:10px; }
+  #qr img, #qr canvas { border:8px solid #fff; box-shadow:0 0 0 1px var(--line); }
+  details summary { cursor:pointer; font-weight:600; }
+  ul.samples { padding-left:18px; } ul.samples li { margin:4px 0; }
+  footer { max-width:760px; margin:24px auto 40px; padding:0 16px; color:var(--muted); font-size:12px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="demo">DEMONSTRATION ONLY — every activity, date and certificate number on this site is invented placeholder data. Nothing here refers to a real UNODC event or a real person.</div>
+<header>
+  <div class="wrap">
+    <div class="mark">DEMO</div>
+    <div>
+      <h1>Certificate validator (design demo)</h1>
+      <p>Checks whether a certificate number was issued for a listed training activity. No names, e-mails or photos are stored on this site.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <form id="f">
+      <label for="c">Certificate number</label>
+      <div class="row">
+        <input type="text" id="c" placeholder="UNODC-XXXXXXXX-P-XXXXXX" autocomplete="off" spellcheck="false" required>
+        <button type="submit">Validate</button>
+      </div>
+      <div class="hint">Printed on the certificate under the QR code. Scanning the QR code opens this page with the number filled in.</div>
+    </form>
+    <details style="margin-top:14px">
+      <summary>Sample numbers to try (all fake)</summary>
+      <ul class="samples">
+        <li><a href="?c=UNODC-DEADBEEF-P-DEM001">UNODC-DEADBEEF-P-DEM001</a> — valid participation certificate, with name confirmation enabled (name: <em>Demo Participant</em>, code: <em>DEMO-1234</em>)</li>
+        <li><a href="?c=UNODC-DEADBEEF-A-DEM007">UNODC-DEADBEEF-A-DEM007</a> — valid certificate of appreciation (name: <em>Demo Guest Speaker</em>, code: <em>DEMO-7777</em>)</li>
+        <li><a href="?c=UNODC-DEADBEEF-P-DEM003">UNODC-DEADBEEF-P-DEM003</a> — revoked</li>
+        <li><a href="?c=UNODC-C0FFEE42-P-DEM201">UNODC-C0FFEE42-P-DEM201</a> — valid, activity published without name confirmation</li>
+        <li><a href="?c=UNODC-DEADBEEF-P-ZZZ999">UNODC-DEADBEEF-P-ZZZ999</a> — well-formed but never issued</li>
+        <li><a href="?c=UNODC-12345678-P-ABC123">UNODC-12345678-P-ABC123</a> — activity not published at all</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="card" id="result" hidden>
+    <div class="status" id="status"><span class="dot"></span><span id="statusText"></span></div>
+    <dl id="facts"></dl>
+    <p class="small" id="note"></p>
+  </section>
+
+  <section class="card" id="namecheck" hidden>
+    <h3 style="margin-top:0">Optional: confirm the name on the certificate</h3>
+    <p class="small">The name is <strong>not</strong> stored on this site. If you hold the certificate, enter the name exactly as printed and the verification code printed beside the QR code; the check is computed in your browser and compared with a one-way fingerprint.</p>
+    <form id="nf">
+      <div class="row">
+        <input type="text" id="nm" placeholder="Name as printed" style="text-transform:none">
+        <input type="text" id="vc" placeholder="Verification code" style="flex:0 1 200px">
+        <button type="submit" class="secondary">Check name</button>
+      </div>
+    </form>
+    <p id="nres" class="small"></p>
+  </section>
+
+  <section class="card" id="actions" hidden>
+    <h3 style="margin-top:0">Need a copy of the certificate?</h3>
+    <p class="small">Certificates are held privately by the issuing office and are not downloadable from this site. The holder can request a re-issue by e-mail, quoting the certificate number; the office will send the PDF to the address on file for that participant.</p>
+    <p><a id="req" class="small" href="#">Request a copy by e-mail (demo placeholder address)</a></p>
+    <button type="button" class="secondary" id="showqr">Show the QR code this certificate would carry</button>
+    <div id="qr"></div>
+  </section>
+</main>
+
+<footer>
+  Design demonstration for the UNODC ROSEAP activity sign-in and certificate feature (plan dated 2026-09-07). Data files: <code>data/&lt;activity&gt;.json</code>, one per published activity, containing only activity number, generalized title, dates, and certificate numbers. Source: this repository.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  const ID_RE = /^UNODC-([0-9A-F]{8})-([PA])-([0-9A-Z]{6})$/;
+  const TYPE = { P: 'Certificate of participation', A: 'Certificate of appreciation' };
+  const $ = (s) => document.querySelector(s);
+  let current = null; // { rec, act }
+
+  function normalizeId(raw) { return (raw || '').toUpperCase().replace(/\s+/g, '').replace(/[‐-―]/g, '-'); }
+  function normName(s) { return s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  async function sha256Hex(s) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso + 'T00:00:00Z');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
+  function show(el, on) { el.hidden = !on; }
+  function setStatus(kind, text) {
+    const st = $('#status'); st.className = 'status ' + kind; $('#statusText').textContent = text;
+  }
+  function facts(pairs) {
+    const dl = $('#facts'); dl.innerHTML = '';
+    pairs.forEach(([k, v]) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); });
+  }
+
+  async function validate(raw) {
+    const id = normalizeId(raw);
+    $('#c').value = id;
+    current = null;
+    show($('#result'), true); show($('#namecheck'), false); show($('#actions'), false); $('#qr').innerHTML = ''; $('#nres').textContent = '';
+    const m = ID_RE.exec(id);
+    if (!m) { setStatus('unknown', 'Not a valid certificate number'); facts([['Entered', id || '(empty)']]); $('#note').textContent = 'A certificate number looks like UNODC-XXXXXXXX-P-XXXXXX (activity, type, serial).'; return; }
+    const act = m[1].toLowerCase();
+    let data;
+    try {
+      const r = await fetch('data/' + act + '.json', { cache: 'no-store' });
+      if (r.status === 404) { setStatus('unknown', 'No record of this certificate'); facts([['Certificate number', id], ['Activity', m[1]]]); $('#note').textContent = 'No published record exists for this activity number. Either the certificate is not genuine, or the issuing office has not yet published attendance for this activity — contact the office to check.'; show($('#actions'), true); $('#req').href = mailto(id); return; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      data = await r.json();
+    } catch (e) { setStatus('unknown', 'Could not check right now'); facts([['Certificate number', id]]); $('#note').textContent = 'The record could not be loaded (' + e.message + '). Try again later.'; return; }
+    const rec = (data.certificates || []).find(c => c.id === id);
+    const base = [['Certificate number', id], ['Type', TYPE[m[2]]], ['Activity', data.title || '(untitled)'], ['Dates', fmtDate(data.start) + (data.end && data.end !== data.start ? ' – ' + fmtDate(data.end) : '')], ['Location', data.location || '—'], ['Organizer', data.organizer || '—']];
+    if (!rec) { setStatus('unknown', 'Not issued for this activity'); facts(base); $('#note').textContent = 'The activity is published, but this certificate number is not among the certificates issued for it.'; show($('#actions'), true); $('#req').href = mailto(id); return; }
+    current = { rec, act: data };
+    if (rec.status === 'revoked') { setStatus('revoked', 'Certificate revoked'); facts(base.concat([['Issued', fmtDate(rec.issued)], ['Revoked', fmtDate(rec.revoked)]])); $('#note').textContent = 'This certificate number was issued but has since been withdrawn by the issuing office.'; }
+    else { setStatus('valid', 'Valid certificate'); facts(base.concat([['Issued', fmtDate(rec.issued)], ['Record published', (data.published || '').slice(0, 10)]])); $('#note').textContent = 'This confirms that a certificate with this number was issued for the activity above. It does not display the holder\'s name; use the optional name check below if you are holding the certificate.'; }
+    show($('#namecheck'), !!(data.nameCheck && rec.h));
+    show($('#actions'), true); $('#req').href = mailto(id);
+  }
+
+  function mailto(id) {
+    // DEMO placeholder — a production build would use the issuing office's functional mailbox.
+    return 'mailto:certificates@example.invalid?subject=' + encodeURIComponent('Certificate copy request ' + id) + '&body=' + encodeURIComponent('Certificate number: ' + id + '\nName as printed: \nE-mail address on file: \n');
+  }
+
+  $('#f').addEventListener('submit', (e) => { e.preventDefault(); const id = normalizeId($('#c').value); history.replaceState(null, '', '?c=' + encodeURIComponent(id)); validate(id); });
+  $('#nf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!current || !current.rec.h) return;
+    const name = $('#nm').value, code = $('#vc').value.toUpperCase().replace(/\s+/g, '');
+    if (!name.trim() || !code) { $('#nres').textContent = 'Enter both the name and the verification code.'; return; }
+    const h = await sha256Hex(current.rec.id + '|' + code + '|' + normName(name));
+    $('#nres').innerHTML = h === current.rec.h ? '<span class="ok">Name and code match this certificate.</span>' : '<span class="bad">No match.</span> Check the spelling as printed and the verification code.';
+  });
+  $('#showqr').addEventListener('click', () => {
+    if (!current) return;
+    $('#qr').innerHTML = '';
+    const url = location.origin + location.pathname + '?c=' + encodeURIComponent(current.rec.id);
+    new QRCode($('#qr'), { text: url, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+    const p = document.createElement('p'); p.className = 'small'; p.textContent = url; $('#qr').append(p);
+  });
+
+  const q = new URLSearchParams(location.search).get('c') || (location.hash ? location.hash.slice(1) : '');
+  if (q) validate(q);
+})();
+</script>
+</body>
+</html>
