@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "demo": true,
+  "activity": "0badf00d",
+  "title": "DEMO — Workshop on Virtual Asset Investigations (placeholder title)",
+  "start": "2026-06-03",
+  "end": "2026-06-05",
+  "location": "Asia and the Pacific (placeholder)",
+  "organizer": "UNODC Global Programme on Cybercrime — demo placeholder, not a real event",
+  "published": "2026-09-07T00:00:00Z",
+  "nameCheck": true,
+  "certificates": [
+    { "id": "UNODC-0BADF00D-P-DEM101", "type": "participation", "issued": "2026-06-06", "status": "valid", "h": "6fc790ee7b82ca6e0527fd77969aeb4ce859301db7069108339ba722878a67cd" },
+    { "id": "UNODC-0BADF00D-P-DEM102", "type": "participation", "issued": "2026-06-06", "status": "valid" },
+    { "id": "UNODC-0BADF00D-A-DEM109", "type": "appreciation",  "issued": "2026-06-06", "status": "valid" }
+  ]
+}

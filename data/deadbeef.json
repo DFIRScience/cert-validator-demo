@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "demo": true,
+  "activity": "deadbeef",
+  "title": "DEMO — Regional Training on Digital Evidence Handling (placeholder title)",
+  "start": "2026-08-12",
+  "end": "2026-08-14",
+  "location": "Asia and the Pacific (placeholder)",
+  "organizer": "UNODC Global Programme on Cybercrime — demo placeholder, not a real event",
+  "published": "2026-09-07T00:00:00Z",
+  "nameCheck": true,
+  "certificates": [
+    { "id": "UNODC-DEADBEEF-P-DEM001", "type": "participation", "issued": "2026-08-15", "status": "valid",   "h": "5e63a382c9f2ad243594923f3649ccff21a35fc4aaf8c16444a753d5948613ab" },
+    { "id": "UNODC-DEADBEEF-P-DEM002", "type": "participation", "issued": "2026-08-15", "status": "valid" },
+    { "id": "UNODC-DEADBEEF-P-DEM003", "type": "participation", "issued": "2026-08-15", "status": "revoked", "revoked": "2026-08-30" },
+    { "id": "UNODC-DEADBEEF-A-DEM007", "type": "appreciation",  "issued": "2026-08-15", "status": "valid",   "h": "04ce7ac60d9dd4bcb04e982cbdb50e644ff1bb384efc81248f9f5e11d87eed93" }
+  ]
+}

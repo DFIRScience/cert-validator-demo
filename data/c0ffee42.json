@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "demo": true,
+  "activity": "c0ffee42",
+  "title": "DEMO — Training of Trainers on Online Child Protection (placeholder title)",
+  "start": "2026-03-17",
+  "end": "2026-03-21",
+  "location": "Asia and the Pacific (placeholder)",
+  "organizer": "UNODC Global Programme on Cybercrime — demo placeholder, not a real event",
+  "published": "2026-09-07T00:00:00Z",
+  "nameCheck": false,
+  "certificates": [
+    { "id": "UNODC-C0FFEE42-P-DEM201", "type": "participation", "issued": "2026-03-22", "status": "valid" },
+    { "id": "UNODC-C0FFEE42-P-DEM202", "type": "participation", "issued": "2026-03-22", "status": "valid" },
+    { "id": "UNODC-C0FFEE42-A-DEM209", "type": "appreciation",  "issued": "2026-03-22", "status": "valid" }
+  ]
+}
